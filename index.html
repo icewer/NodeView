@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="ISO-8859-1">
+  <title>Representación Gráfica de Listas de Nodos</title>
+  <meta name="author" content="David Luna">
+  <meta name="description" content="Node Graph Representation">
+  <meta name="keywords" content="coffeescript,l-system">
+  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
+ </head>
+ <body>
+ <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+ <script src="http://twitter.github.io/bootstrap/assets/js/bootstrap-button.js"></script>
+ <script src="http://twitter.github.io/bootstrap/assets/js/bootstrap-alert.js"></script>
+	 <div id="Params" style="position:absolute;top:200px;left:-180px; width:200px;">
+		<a href="#" class="btn btn-info btn-mini pull-right" onclick="tParam(tp);">Parámetros <i class="icon-white icon-cog"></i></a>
+		<form action="#" class="well form-inline">
+			<label>Longitud del Enlace: </label><input id="cntLong" type="number" style="width: 45px;" value="1">
+		</form>
+	 </div>
+     <div class="container">
+         <header>
+            <h1>Gráficos de Nodos</h1>
+            <p class="lead">by icewer</p>
+        </header>
+        <form id="maincontrol" action="#" class="well form-inline">
+            <label>Lista de Nodos:</label>
+            <input id="raiz" type="text" class="input-large" placeholder="Introducir/Pegar"/>
+            <div class="btn-group"><button id="btnAnalizar" class="btn btn-inverse" data-loading-text='<i class="icon-spinner icon-spin"></i> Analizando...' onclick="Analizar();">Analizar</button><button id="btnDibujar" class="btn btn-success disabled" onclick="DibujarNodos(Escala,TrP,arot);">Dibujar</button></div>
+			<div id="a_info"></div>
+		</form>
+		
+        <div class="row">          
+            <div class="btn-group span12">
+                <button id="zoomIn" class="btn" onclick="zoom(true);">
+                    <i class="icon-zoom-in"></i>
+                </button>
+                <button id="zoomOut" class="btn" onclick="zoom(false);">
+                    <i class="icon-zoom-out"></i>
+                </button>
+                <button id="panLeft" class="btn" onclick="desp_hor(true);">
+                    <i class="icon-chevron-left"></i>
+                </button>
+                <button id="panRight" class="btn" onclick="desp_hor(false);">
+                    <i class="icon-chevron-right"></i>
+                </button>
+                <button id="panUp" class="btn" onclick="desp_ver(true);">
+                    <i class="icon-chevron-up"></i>
+                </button>
+                <button id="panDown" class="btn" onclick="desp_ver(false);">
+                    <i class="icon-chevron-down"></i>
+                </button>
+                </button>
+                <button id="rotL" class="btn" onclick="rotar(true);">
+                    <i class="icon-repeat"></i>
+                </button>
+                </button>
+                <button id="rotR" class="btn" onclick="rotar(false);">
+                    <i class="icon-undo"></i>
+                </button>				
+				<button id="btnLimpiar" class="btn" onclick="limpiar();">Limpiar</button>
+				<button id="btnAnimar" class="btn " onclick="animar(go);" data-toggle="button">Animar</button>
+				<div class="btn-group" data-toggle="buttons-radio">
+					<button type="button" onclick="spin--;" class="btn btn-warning"><i class="icon-backward"></i></button>
+					<button type="button" onclick="spin++;" class="btn btn-warning"><i class="icon-forward"></i></button>
+				</div>
+				<label class="checkbox">
+				  <input type="checkbox" onclick="Ver = !Ver; DibujarNodos(Escala,TrP,arot);" value="">
+				  Ver Información de los Nodos
+				</label>
+			</div>
+			
+		</div>
+		<div class="row" style="margin-top:12px;"> 
+            <canvas id="canvas" style="border:2px solid lightgrey;" class="span12 img-rounded" height="400px" width="800px"></canvas>
+        </div>
+    </div>
+    
+    <script>
+	function zoom(acercar) {
+		//var from = Escala;
+		if (acercar) Escala /= mult;
+		else Escala *= mult;
+		/*for(var i=from;i<Escala;i+=0.01)
+			DibujarNodos(i,TrP,arot);*/
+		DibujarNodos(Escala,TrP,arot);
+	    }
+	function desp_ver(mas) {
+		if (mas) TrP.y += 80 * Escala;
+		else TrP.y -= 80 * Escala;
+		DibujarNodos(Escala,TrP,arot);
+	    }
+	function desp_hor(mas) {
+		if (mas) TrP.x += 80 * Escala;
+		else TrP.x -= 80 * Escala;
+		DibujarNodos(Escala,TrP,arot);
+	    }
+	function rotar(dir){
+		arot = dir ? arot+(Math.PI / 10) : arot-(Math.PI / 10);
+		DibujarNodos(Escala,TrP,arot);
+	}
+	function limpiar(){
+		context.clearRect(0,0,canvas.width,canvas.height); // Limpiamos el canvas
+	}
+	function tParam(p){
+		var a = p ? 200 : -180;
+		$('#Params').animate({left: a});
+		tp = !tp;
+	}
+	function autorotado(){
+		arot += Math.PI / 180 * spin;
+		DibujarNodos(Escala,TrP,arot);
+	}
+	function animar(p){
+		c = p ? setInterval(autorotado, 100) : clearInterval(c); 
+		go = !go;
+	}
+	var Ver = false;
+	var go=true;
+	var spin=2;
+	var c,JSInput;
+	var UserInput = "";
+	// v de giro
+	var LineasD =[];
+	var NodosD = [];
+	var TextoD = [];
+	var Lista;
+	var Colores = ["red","green","orange","purple","yellow","blue","black"];
+	var ListaNodos = [];
+	var NodosProcesables = [];
+	var NodosDibujar = [];
+	var Radianes = (Math.PI / 180);
+	var canvas = document.getElementById('canvas');
+	var context = canvas.getContext('2d');
+	var cX = canvas.width / 2;
+	var cY = canvas.height / 2;
+	var Raices = [];
+	var tp = true;
+	var LongLinea = 1;
+	var Escala = 1.0;
+	var mult = 0.8;
+	var arot = 0;
+	var TrP = {
+        x: cX,
+        y: cY};
+	var Raiz, A=0, xX, nY, Hijo, radio, xT, yT, Color, JSn, JSh;
+	var tNodos = 1, tEnlaces = 0, tPadres = 1, tProf = 0;
+	  
+	function Estadisticas() {
+		$("#btnAnalizar").button('reset');
+		$("#btnDibujar").removeClass('disabled');
+	    tNodos = NodosDibujar.length;
+		tEnlaces = (tNodos-1);
+		$("#a_info").html('<div style="margin-top:12px;" class="alert alert-success"><a class="close" data-dismiss="alert" href="#">&times;</a><strong><h5>¡Análisis Completo!</strong></h5>Número de Nodos: '+tNodos+'<br/>Nodos con Hijos: '+tPadres+'<br/>Profundidad Máxima: '+tProf+'<br/>Nº de Enlaces: '+tEnlaces+'</div>');
+	}
+
+	function Nodo(nombre,hijos,posX,posY,ox,oy,prof,ang,hp,radio){
+		this.Nombre = nombre;
+		this.Prof = prof;
+		this.Radio = radio;
+		this.A = ang;
+		this.esHijo = hp;
+		this.XPadre = ox;
+		this.YPadre = oy;
+		this.X = posX;
+		this.Y = posY;
+		this.Hijos = typeof(hijos) === 'string' ? "": hijos; // Fix para que coja Strings en los nodos
+		this.NumHijos = this.Hijos.length;
+		this.TieneHijos = this.NumHijos > 0;
+	  }
+	/*	LISTA DE NODOS	*/
+	function ProcesarNodo(MasterNode,esJSON){
+		tProf=MasterNode.Prof+1;
+	    NodosProcesables.pop();
+		// Si los hijos tienen hijos, los añadimos
+		for (var i = 0; i < MasterNode.Hijos.length; i++) {
+			EscalarLinea=3/tProf;
+			if (MasterNode.esHijo) A = ((360 / (MasterNode.NumHijos + 1)) * (i + 1) + 180) * Radianes+(MasterNode.A); // Alineación con el enlace del padre
+			else { A = (360 / (MasterNode.NumHijos)) * i * Radianes; tPadres++;}
+			radio = 15 / tProf;
+			JSn = esJSON ? MasterNode.Hijos[i].Name : "["+MasterNode.Hijos[i]+"]";
+			JSh = esJSON ? MasterNode.Hijos[i].Children : MasterNode.Hijos[i];
+			nX = MasterNode.XPadre + Math.cos(A) * 50 * EscalarLinea;
+			nY = MasterNode.YPadre - Math.sin(A) * 50 * EscalarLinea;	
+			Hijo = new Nodo(JSn,JSh,MasterNode.XPadre,MasterNode.YPadre,nX,nY,MasterNode.Prof+1,A,true,radio);
+			if (Hijo.TieneHijos) NodosProcesables.push(Hijo);
+			NodosDibujar.push(Hijo);}
+		// Si quedan nodos, seguimos procesando de atrás a adelante (por el funcionamiento tipo pila del push/pop)
+		if (NodosProcesables.length > 0) ProcesarNodo(NodosProcesables[NodosProcesables.length -1],esJSON);
+		else Estadisticas();
+	}
+
+	function DibujarNodos(esc,trns,rot){
+		Lista = NodosDibujar; 
+		LineasD.length = 0;
+		NodosD.length = 0;
+		TextoD.length = 0;
+		// Preparamos los elementos a dibujar 
+		for (var i = 0; i < Lista.length; i++) { 
+			  Color = Colores[Lista[i].Prof%8];
+			  LineasD.push([Lista[i].XPadre,Lista[i].YPadre,Lista[i].X,Lista[i].Y,Color])
+			  NodosD.push([Lista[i].XPadre, Lista[i].YPadre, Lista[i].Radio,Color,Lista[i].TieneHijos ? 3 : 2])
+			  xT = (Lista[i].XPadre * Math.cos(rot) - Lista[i].YPadre * Math.sin(rot)) + Lista[i].Radio + 4;
+			  yT = (Lista[i].XPadre * Math.sin(rot) + Lista[i].YPadre * Math.cos(rot)) - 6;
+			  TextoD.push([Lista[i].Nombre+": "+Lista[i].Prof,xT,yT]);}
+		// Preparamos el contexto del canvas
+		limpiar();
+		context.save();
+		context.translate(trns.x, trns.y);
+		context.rotate(rot);
+		context.scale(esc, esc);
+		// Líneas (Antes que los nodos, así no solapan)
+		for (var i = 0; i < LineasD.length; i++) {
+			context.beginPath();
+			context.lineWidth = 1;
+			context.moveTo(LineasD[i][0],LineasD[i][1]);
+			context.lineTo(LineasD[i][2],LineasD[i][3]);
+			context.strokeStyle = LineasD[i][4]; // 8 Colores, ciclos
+			context.stroke();}
+		// Nodos
+		for (var i = 0; i < NodosD.length; i++) {
+			context.beginPath();
+			context.arc(NodosD[i][0], NodosD[i][1], NodosD[i][2], 0, 2 * Math.PI, false);
+			context.fillStyle = NodosD[i][3]; 
+			context.fill();
+			context.lineWidth = NodosD[i][4];
+			context.strokeStyle = 'black';
+			context.stroke();}
+		// Texto
+		if (Ver)
+		for (var i = 0; i < TextoD.length; i++) {
+			context.fillStyle = 'black';
+			context.font = '12px san-serif';
+			context.rotate(-rot);
+			context.fillText(TextoD[i][0], TextoD[i][1], TextoD[i][2]);
+			context.rotate(rot);}
+		context.restore();
+	}
+
+	function Analizar(){
+		$("#btnAnalizar").button('loading');
+		// Vaciamos los datos previos
+		NodosDibujar.length = 0;
+		LineasD.length = 0;
+		NodosD.length = 0;
+		TextoD.length = 0;
+		tProf=0;tPadres=0;
+		// ["A",[["B","K",["1","2","3"]],"J"],"C",["1","2"],"E"];
+		// [0,[0,0],[0,0,[0,0,0],0],0,[0,0],0,[0,0,0,0,0],0];
+		// [[[[[0]]],[0,0]],[0,[0,0,0],0],[0,0],[0,[0,0,0],0],[[0,0],[0,0]]];
+		// [0,[[0,0]]];
+		// [0,[0,0]]; 
+		// ["A",["BE","C"]];
+		// 1: JSON.parse($("#raiz").val())
+		// 2: $("#raiz").val()
+		//Raiz = {"Name": "Root","Children": [{"Name": "Child 1","Children": []},{"Name": "Child 2","Children": [{"Name": "Child 1","Children": []},{"Name": "Child 2","Children": []},{"Name": "Child 3","Children": []}]},{"Name": "Child 3","Children": [{"Name": "Child 1","Children": [{"Name": "Child 1","Children": []},{"Name": "Child 2","Children": []},{"Name": "Child 3","Children": []}]},{"Name": "Child 2","Children": []},{"Name": "Child 3","Children": []}]}]};
+		
+		UserInput = $("#raiz").val(); 
+
+		if (UserInput[0]=="{") JSInput = true;
+		else if (UserInput[0]=="[") JSInput = false;
+		else {$("#a_info").html('<div style="margin-top:12px;" class="alert alert-error"><a class="close" data-dismiss="alert" href="#">&times;</a><strong><h5>Error:</strong></h5>Entrada no reconocida. Utilice Arrays "[0,1,[2,3,[4,5]],6]" o JSON con campos NAME y CHILDREN "{"Name":"Root","Children":[{"Name":"Child 1","Children":[]},{"Name":"Child 2","Children":[]},{"Name":"Child 3","Children":[]}]}"</div>'); $("#btnAnalizar").button('reset'); return;}
+
+		Raiz = JSInput ? new Nodo(JSON.parse(UserInput).Name,JSON.parse(UserInput).Children,0,0,0,0,0,0,false,20) : new Nodo("Raiz",JSON.parse(UserInput),0,0,0,0,0,0,false,20);		
+		NodosProcesables.push(Raiz);
+		NodosDibujar.push(Raiz);
+		ProcesarNodo(Raiz,JSInput);
+	}
+	</script>
+ </body>
+</html>
+
