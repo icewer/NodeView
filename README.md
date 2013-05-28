@@ -1,13 +1,13 @@
 Node Graph Visualization
 ========================
-*This is still on **BETA** version*
+_This is still on **BETA** version_
 
 How to Use
 ----------
-To view a node representation, insert a valid **Array/JSON** string.
-**JSON** strings must have *"Name"* and *"Children"* fields.
-**JSON** Root Node shouldn't be in array: Use {} instead of [] *(See examples below)*
-Use [jsonlint.com](http://jsonlint.com) for checking **JSON** syntax.
+To view a node representation, insert a valid **Array/JSON** string.  
+**JSON** strings must have *"Name"* and *"Children"* fields.  
+**JSON** Root Node shouldn't be in array: Use **{}** instead of **[]** *(See examples below)*  
+Use [jsonlint.com](http://jsonlint.com) for checking **JSON** syntax.  
 
 
 
@@ -41,7 +41,7 @@ Use [jsonlint.com](http://jsonlint.com) for checking **JSON** syntax.
 	          },
 	          { "Name": "Child 3",
 	            "Children": []}
-	          ]
+	      ]
         }
 	
 Demo
