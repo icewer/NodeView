@@ -27,7 +27,7 @@ Use [jsonlint.com](http://jsonlint.com) for checking **JSON** syntax.
 
         {"Name": "Root",
     	 "Children": [
-	 	  { "Name": "Child 1",
+	          { "Name": "Child 1",
 	            "Children": []},
 	          { "Name": "Child 2",
 	            "Children": [
