@@ -44,11 +44,11 @@
 		tp = !tp;
 	}
 	function autorotado(){
-		arot += Math.PI / 180 * spin;
+		arot += Math.PI / 359 * spin;
 		DibujarNodos(Escala,TrP,arot);
 	}
 	function animar(p){
-		c = p ? setInterval(autorotado, 100) : clearInterval(c); 
+		c = p ? setInterval(autorotado, 20) : clearInterval(c); 
 		go = !go;
 	}
 	
