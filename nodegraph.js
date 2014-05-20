@@ -144,7 +144,7 @@
 	/* ANALISIS DE LA ENTRADA Y PREPARACION DE VARIABLES */
 	
 	function Analizar(){
-		$("#btnAnalizar").button('loading');
+		//$("#btnAnalizar").button('loading');
 		// Restauramos los arrays
 		NodosDibujar.length = 0;
 		LineasD.length = 0;
@@ -166,7 +166,7 @@
 	/* ESTADISTICAS DEL ARBOL DE NODOS */
 	
 	function Estadisticas() {
-		$("#btnAnalizar").button('reset');
+		//("#btnAnalizar").button('reset');
 		$("#btnDibujar").removeClass('disabled');
 	    tNodos = NodosDibujar.length;
 		tEnlaces = (tNodos-1);
